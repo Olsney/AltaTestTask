@@ -2,7 +2,9 @@ using Code.Infrastructure.AssetManagement;
 using Code.Infrastructure.Factory;
 using Code.Infrastructure.States;
 using Code.Services.Inputs;
+using Code.Services.PlayerBallProvider;
 using Code.Services.StaticData;
+using Code.Services.TapInputHandlerProvider;
 using UnityEngine;
 using Zenject;
 
@@ -42,6 +44,8 @@ namespace Code.Infrastructure.Installers
             BindInputService();
             Container.Bind<IStaticDataService>().To<StaticDataService>().AsSingle();
             Container.Bind<IAssetProvider>().To<AssetProvider>().AsSingle();
+            Container.Bind<ITapInputHandlerProvider>().To<TapInputHandlerProvider>().AsSingle();
+            Container.Bind<IPlayerBallProvider>().To<PlayerBallProvider>().AsSingle();
         }
         
         private void BindInputService()

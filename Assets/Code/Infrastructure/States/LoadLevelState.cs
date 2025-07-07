@@ -50,7 +50,8 @@ namespace Code.Infrastructure.States
 
         private void InitGameWorld()
         {
-            GameObject hero = _gameFactory.CreatePlayerBall(at: GetHeroSpawnPosition());
+            GameObject playerBall = _gameFactory.CreatePlayerBall(at: GetHeroSpawnPosition());
+            GameObject tapInputHandler = _gameFactory.CreateTapInputHandler();
         }
 
         private Vector3 GetHeroSpawnPosition() => 
