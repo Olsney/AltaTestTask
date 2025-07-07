@@ -1,5 +1,6 @@
 using Code.Infrastructure.Factory;
 using Code.Infrastructure.States;
+using Code.Services.Input;
 using Code.Services.StaticData;
 using UnityEngine;
 using Zenject;
