@@ -1,3 +1,4 @@
+using Code.Infrastructure.Factory.Armament;
 using Code.Services.PlayerBallProvider;
 using Code.Services.TapInputHandlerProvider;
 using UnityEngine;
@@ -8,18 +9,21 @@ namespace Code.GamePlay
     public class Scaler : MonoBehaviour
     {
         private ITapInputHandlerProvider _tapInputHandlerProvider;
-        private TapInputHandler _tapInputHandler;
+        private IBulletFactory _bulletFactory;
         private IPlayerBallProvider _playerBallProvider;
+        
+        private TapInputHandler _tapInputHandler;
         private GameObject _playerBall;
         private float _currentSize;
 
         [Inject]
         public void Construct(ITapInputHandlerProvider tapInputHandlerProvider,
-            IPlayerBallProvider playerBallProvider)
+            IPlayerBallProvider playerBallProvider,
+            IBulletFactory bulletFactory)
         {
             _tapInputHandlerProvider = tapInputHandlerProvider;
             _playerBallProvider = playerBallProvider;
-
+            _bulletFactory = bulletFactory;
         }
 
         private void Awake()

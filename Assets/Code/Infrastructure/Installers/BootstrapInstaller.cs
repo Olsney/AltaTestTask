@@ -1,5 +1,6 @@
 using Code.Infrastructure.AssetManagement;
 using Code.Infrastructure.Factory;
+using Code.Infrastructure.Factory.Armament;
 using Code.Infrastructure.States;
 using Code.Services.Inputs;
 using Code.Services.PlayerBallProvider;
@@ -28,6 +29,7 @@ namespace Code.Infrastructure.Installers
         {
             Container.Bind<IGameFactory>().To<GameFactory>().AsSingle();
             Container.Bind<IStateFactory>().To<StateFactory>().AsSingle();
+            Container.Bind<IBulletFactory>().To<BulletFactory>().AsSingle();
         }
 
         private void BindStates()
