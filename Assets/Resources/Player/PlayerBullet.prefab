@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7372502212126361124}
   - component: {fileID: 1477216478060530799}
   - component: {fileID: 184215216670122832}
+  - component: {fileID: -2346290592387827429}
   m_Layer: 0
   m_Name: PlayerBullet
   m_TagString: Untagged
@@ -110,3 +111,15 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!114 &-2346290592387827429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7291741289093461555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e36304647bc54c9196b3a7d46f22f9fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

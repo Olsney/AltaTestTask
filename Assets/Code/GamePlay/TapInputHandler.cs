@@ -27,7 +27,7 @@ namespace Code.GamePlay
                 _isHeld = true;
             }
 
-            if (_inputService.IsTapEnded())
+            if (_inputService.IsTapEnded() && _isHeld)
             {
                 TapEnded?.Invoke();
                 _isHeld = false;
