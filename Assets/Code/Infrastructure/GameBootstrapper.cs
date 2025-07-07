@@ -8,13 +8,11 @@ namespace Code.Infrastructure
     public class GameBootstrapper : MonoBehaviour, ICoroutineRunner
     {
         private GameStateMachine _gameStateMachine;
-        private IGameFactory _gameFactory;
         
         [Inject]
         private void Construct(GameStateMachine gameStateMachine, IGameFactory gameFactory)
         {
             _gameStateMachine = gameStateMachine;
-            _gameFactory = gameFactory;
         }
         
         private void Start()

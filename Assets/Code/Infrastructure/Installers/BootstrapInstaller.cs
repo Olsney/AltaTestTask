@@ -16,6 +16,7 @@ namespace Code.Infrastructure.Installers
             BindFactories();
             BindStates();
             BindServices();
+            BindSceneLoader();
         }
 
         private void BindCoroutine() => 
@@ -50,5 +51,8 @@ namespace Code.Infrastructure.Installers
             else
                 Container.Bind<IInputService>().To<MobileInputService>().AsSingle();
         }
+        
+        private void BindSceneLoader() => 
+            Container.Bind<SceneLoader>().AsSingle();
     }
 }

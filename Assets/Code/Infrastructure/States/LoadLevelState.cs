@@ -6,7 +6,7 @@ namespace Code.Infrastructure.States
 {
     public class LoadLevelState : IPayloadedState<string>
     {
-        private const string InitialPointTag = "InitialPoint";
+        private const string InitialPointTag = "InitialBallPoint";
         private const string EmptySceneName = "Empty";
 
         private readonly GameStateMachine _stateMachine;
