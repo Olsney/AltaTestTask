@@ -1,3 +1,4 @@
+using System;
 using Code.GamePlay.InputHandler;
 using Code.Infrastructure.Factory.Armament;
 using Code.Services.PlayerBallProvider;
@@ -9,6 +10,10 @@ namespace Code.GamePlay.Scaler
 {
     public class Scaler : MonoBehaviour
     {
+        private const int MaxShots = 7;
+        private const float CheckDelay = 2f;
+        private const float RadiusToFindDoor = 100f;
+
         [SerializeField] private float _minBallScale = 0.2f;
         [SerializeField] private float _scaleDecreaseSpeed = 0.25f;
         [SerializeField] private float _infectionRadiusPerMoment = 2.0f;
@@ -27,6 +32,9 @@ namespace Code.GamePlay.Scaler
 
         private bool _isCharging;
         private float _infectionRadius;
+        
+        private int _shotsFired;
+        private Transform _doorTransform;
 
         [Inject]
         public void Construct(ITapInputHandlerProvider tapInputHandlerProvider,
@@ -46,6 +54,8 @@ namespace Code.GamePlay.Scaler
 
             _tapInputHandler.TapStarted += OnTapStarted;
             _tapInputHandler.TapEnded += OnTapEnded;
+
+            TryFindDoor();
         }
 
         private void OnDestroy()
@@ -73,6 +83,7 @@ namespace Code.GamePlay.Scaler
                 _infectionRadius += delta * _infectionRadiusPerMoment;
                 OnTapEnded();
                 GameOver();
+                
                 return;
             }
 
@@ -83,6 +94,13 @@ namespace Code.GamePlay.Scaler
 
         private void OnTapStarted()
         {
+            if (_shotsFired >= MaxShots)
+            {
+                Debug.Log("No shots remaining");
+                return;
+            }
+
+            
             _isCharging = true;
             _infectionRadius = 0f;
 
@@ -103,6 +121,26 @@ namespace Code.GamePlay.Scaler
             Vector3 direction = Vector3.left;
 
             _bullet.Initialize(direction, finalInfectionRadius);
+            
+            _shotsFired++;
+            if (_shotsFired >= MaxShots)
+                StartCoroutine(CheckPathAndGameOver());
+        }
+
+        private void TryFindDoor()
+        {
+            Collider[] colliders = Physics.OverlapSphere(_playerBall.transform.position, RadiusToFindDoor);
+
+            foreach (Collider collider in colliders)
+            {
+                if (collider.TryGetComponent(out Door door) == false)
+                    continue;
+                
+                _doorTransform = door.transform;
+            }
+            
+            if(_doorTransform == null)
+                throw new Exception("Door is not found");
         }
 
         private Bullet CreateBullet()
@@ -114,6 +152,36 @@ namespace Code.GamePlay.Scaler
             GameObject bullet = _bulletFactory.CreateBullet(spawnPoint);
             return bullet.GetComponent<Bullet>();
         }
+        
+        private System.Collections.IEnumerator CheckPathAndGameOver()
+        {
+            yield return new WaitForSeconds(CheckDelay);
+
+            if (IsPathBlocked())
+                GameOver();
+        }
+
+        private bool IsPathBlocked()
+        {
+            if (_doorTransform == null)
+                return false;
+
+            Vector3 start = _playerBall.transform.position;
+            Vector3 direction = _doorTransform.position - start;
+            
+            float distance = direction.magnitude;
+
+            RaycastHit[] hits = Physics.RaycastAll(start, direction.normalized, distance);
+            
+            foreach (RaycastHit hit in hits)
+            {
+                if (hit.collider.GetComponent<Obstacle>() != null)
+                    return true;
+            }
+
+            return false;
+        }
+
 
         private void GameOver()
         {

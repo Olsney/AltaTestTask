@@ -4,7 +4,7 @@ namespace Code.GamePlay
 {
     public class Bullet : MonoBehaviour
     {
-        private const float DelayBeforeDestroy = 2f;
+        private const float DelayBeforeDestroy = 1f;
 
         [SerializeField] private float _speed = 10f;
 
