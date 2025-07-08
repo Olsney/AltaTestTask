@@ -17,6 +17,9 @@ namespace Code.GamePlay
             
             renderer.material = new Material(renderer.material);
             renderer.material.color = InfectedColor;
+            
+            Collider collider = GetComponent<Collider>();
+            collider.enabled = false;
 
             Destroy(gameObject, DelayBeforeDestroy);
         }

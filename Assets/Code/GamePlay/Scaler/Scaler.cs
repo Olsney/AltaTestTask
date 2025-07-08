@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using Code.GamePlay.InputHandler;
+using Code.GamePlay.PlayerBall;
 using Code.GamePlay.TargetOnLevel;
 using Code.Infrastructure.Factory.Armament;
 using Code.Services.PlayerBallProvider;
@@ -38,6 +40,8 @@ namespace Code.GamePlay.Scaler
         private int _shotsFired;
         private Transform _doorTransform;
         private ILevelTargetProvider _levelTargetProvider;
+        private Ball _ball;
+        private bool _pathCleared;
 
         [Inject]
         public void Construct(ITapInputHandlerProvider tapInputHandlerProvider,
@@ -57,6 +61,8 @@ namespace Code.GamePlay.Scaler
             _playerBall = _playerBallProvider.GetBall();
             _initialBallScale = _playerBall.transform.localScale;
             LevelTarget levelTarget = _levelTargetProvider.Instance;
+            _ball = _playerBall.GetComponent<Ball>();
+            _pathCleared = false;
 
             _tapInputHandler.TapStarted += OnTapStarted;
             _tapInputHandler.TapEnded += OnTapEnded;
@@ -100,6 +106,9 @@ namespace Code.GamePlay.Scaler
 
         private void OnTapStarted()
         {
+            if (_pathCleared)
+                return;
+            
             if (_shotsFired >= MaxShots)
             {
                 Debug.Log("No shots remaining");
@@ -118,7 +127,7 @@ namespace Code.GamePlay.Scaler
 
         private void OnTapEnded()
         {
-            if (!_isCharging)
+            if (!_isCharging || _pathCleared)
                 return;
 
             _isCharging = false;
@@ -129,8 +138,8 @@ namespace Code.GamePlay.Scaler
             _bullet.Initialize(direction, finalInfectionRadius);
             
             _shotsFired++;
-            if (_shotsFired >= MaxShots)
-                StartCoroutine(CheckPathAndGameOver());
+            
+            StartCoroutine(CheckPathAfterShot());
         }
 
         private void TryFindDoor()
@@ -159,12 +168,25 @@ namespace Code.GamePlay.Scaler
             return bullet.GetComponent<Bullet>();
         }
         
-        private System.Collections.IEnumerator CheckPathAndGameOver()
+        private IEnumerator CheckPathAfterShot()
         {
             yield return new WaitForSeconds(CheckDelay);
 
             if (IsPathBlocked())
-                GameOver();
+            {
+                if (_shotsFired >= MaxShots)
+                    GameOver();
+            }
+            else
+            {
+                _pathCleared = true;
+                _tapInputHandler.TapStarted -= OnTapStarted;
+                _tapInputHandler.TapEnded -= OnTapEnded;
+                
+                if (_ball != null && _levelTargetProvider.Instance != null)
+                    _ball.JumpTo(_levelTargetProvider.Instance.transform.position);
+            }
+
         }
 
         private bool IsPathBlocked()
@@ -191,7 +213,7 @@ namespace Code.GamePlay.Scaler
 
         private void GameOver()
         {
-            Debug.LogError("Game Over — Ball scale reached minimum!");
+            Debug.LogError("Game Over");
         }
     }
 }
