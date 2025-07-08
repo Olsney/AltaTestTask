@@ -1,19 +1,19 @@
+using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Code.GamePlay
 {
-    using UnityEngine;
-
     public class Bullet : MonoBehaviour
     {
-        private const float DelayBeforeDestroy = 2f;
-        
+        private const float DelayBeforeDestroy = 0.5f;
+
         [SerializeField] private float _speed = 10f;
 
         private Vector3 _direction;
         private bool _canMove;
         private float _infectionRadius;
+
+        public event Action<Bullet> BulletDestroyed;
 
         public void Initialize(Vector3 direction, float infectionRadius)
         {
@@ -30,12 +30,12 @@ namespace Code.GamePlay
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.TryGetComponent<Obstacle>(out var obstacle) == false)
+            if (!other.TryGetComponent<Obstacle>(out var obstacle))
                 return;
 
             _canMove = false;
             Explode();
-            Destroy(gameObject, DelayBeforeDestroy);
+            Invoke(nameof(DestroySelf), DelayBeforeDestroy);
         }
 
         private void Explode()
@@ -48,5 +48,19 @@ namespace Code.GamePlay
                     obstacle.Infect();
             }
         }
+
+        private void DestroySelf()
+        {
+            BulletDestroyed?.Invoke(this);
+            Destroy(gameObject);
+        }
+
+#if UNITY_EDITOR
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, _infectionRadius);
+        }
+#endif
     }
 }
