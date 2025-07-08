@@ -11,6 +11,7 @@ namespace Code.GamePlay
         [SerializeField] private float _minBallScale = 0.2f;
         [SerializeField] private float _scaleDecreaseSpeed = 0.25f;
         [SerializeField] private float _infectionRadiusPerMoment = 2.0f;
+        [SerializeField] private float _bulletScaleModifier = 0.5f;
 
         private ITapInputHandlerProvider _tapInputHandlerProvider;
         private IBulletFactory _bulletFactory;
@@ -47,8 +48,11 @@ namespace Code.GamePlay
 
         private void OnDestroy()
         {
-            _tapInputHandler.TapStarted -= OnTapStarted;
-            _tapInputHandler.TapEnded -= OnTapEnded;
+            if (_tapInputHandler != null)
+            {
+                _tapInputHandler.TapStarted -= OnTapStarted;
+                _tapInputHandler.TapEnded -= OnTapEnded;
+            }
         }
 
         private void Update()
@@ -73,7 +77,6 @@ namespace Code.GamePlay
             }
 
             _playerBall.transform.localScale = newScale;
-
             _infectionRadius += delta * _infectionRadiusPerMoment;
             _bulletTransform.localScale += new Vector3(delta, delta, delta);
         }
@@ -87,7 +90,7 @@ namespace Code.GamePlay
             Debug.Log("Создали пулю!");
             _bulletTransform = _bullet.transform;
 
-            _bulletTransform.localScale = Vector3.one * 0.2f;
+            _bulletTransform.localScale = Vector3.one * _bulletScaleModifier;
         }
 
         private void OnTapEnded()
@@ -97,19 +100,22 @@ namespace Code.GamePlay
 
             _isCharging = false;
 
-            Vector3 direction = Vector3.forward;
-            
+            Vector3 direction = Vector3.left;
+            Debug.DrawRay(_playerBall.transform.position, direction * 5f, Color.red, 2f); // 👈 добавь это
+
             _bullet.Initialize(direction, _infectionRadius);
             Debug.Log("Запустили пулю!");
         }
 
         private Bullet CreateBullet()
         {
-            Vector3 spawnPoint = _playerBall.transform.position + Vector3.up * 0.5f;
-            GameObject bullet = _bulletFactory.CreateBullet(spawnPoint);
+            Vector3 spawnPoint = _playerBall.transform.position 
+                                 + _playerBall.transform.right * -1.8f 
+                                 + Vector3.up * 0.1f;
 
+            GameObject bullet = _bulletFactory.CreateBullet(spawnPoint);
             return bullet.GetComponent<Bullet>();
-        }   
+        }
 
         private void GameOver()
         {
