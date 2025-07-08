@@ -1,10 +1,10 @@
 using System;
-using System.Collections;
 using Code.GamePlay.InputHandler;
 using Code.GamePlay.PlayerBall;
 using Code.GamePlay.TargetOnLevel;
 using Code.Infrastructure.Factory.Armament;
 using Code.Services.PlayerBallProvider;
+using Code.Services.Road;
 using Code.Services.TapInputHandlerProvider;
 using Code.Services.TargetProvider;
 using UnityEngine;
@@ -15,7 +15,6 @@ namespace Code.GamePlay.Scaler
     public class Scaler : MonoBehaviour
     {
         private const int MaxShots = 7;
-        private const float CheckDelay = 2f;
         private const float RadiusToFindDoor = 100f;
 
         [SerializeField] private float _minBallScale = 0.2f;
@@ -28,9 +27,11 @@ namespace Code.GamePlay.Scaler
         private IBulletFactory _bulletFactory;
         private IPlayerBallProvider _playerBallProvider;
         private ILevelTargetProvider _levelTargetProvider;
+        private IRoadProvider _roadProvider;
 
         private TapInputHandler _tapInputHandler;
         private GameObject _playerBall;
+        private GameObject _road;
         private Ball _ball;
         private Transform _doorTransform;
         private Bullet _bullet;
@@ -47,30 +48,31 @@ namespace Code.GamePlay.Scaler
             ITapInputHandlerProvider tapInputHandlerProvider,
             IPlayerBallProvider playerBallProvider,
             IBulletFactory bulletFactory,
-            ILevelTargetProvider levelTargetProvider)
+            ILevelTargetProvider levelTargetProvider,
+            IRoadProvider roadProvider)
         {
             _tapInputHandlerProvider = tapInputHandlerProvider;
             _playerBallProvider = playerBallProvider;
             _bulletFactory = bulletFactory;
             _levelTargetProvider = levelTargetProvider;
+            _roadProvider = roadProvider;
         }
 
         public void Initialize()
         {
             _tapInputHandler = _tapInputHandlerProvider.GetTapInputHandler();
             _playerBall = _playerBallProvider.GetBall();
-            
-            if(_playerBall == null)
-                throw new NullReferenceException("Player ball is null");
-            
-            _ball = _playerBall.GetComponent<Ball>();
-            
-            if(_ball == null)
-                throw new NullReferenceException("ball is null");
-            
-            
-            _initialBallScale = _playerBall.transform.localScale;
+            _road = _roadProvider.Instance;
 
+            if (_playerBall == null)
+                throw new NullReferenceException("Player ball is null");
+
+            _ball = _playerBall.GetComponent<Ball>();
+
+            if (_ball == null)
+                throw new NullReferenceException("ball is null");
+
+            _initialBallScale = _playerBall.transform.localScale;
             _pathCleared = false;
 
             _tapInputHandler.TapStarted += OnTapStarted;
@@ -86,6 +88,9 @@ namespace Code.GamePlay.Scaler
                 _tapInputHandler.TapStarted -= OnTapStarted;
                 _tapInputHandler.TapEnded -= OnTapEnded;
             }
+
+            if (_bullet != null)
+                _bullet.BulletDestroyed -= OnBulletDestroyed;
         }
 
         private void Update()
@@ -105,7 +110,6 @@ namespace Code.GamePlay.Scaler
                 _isCharging = false;
                 OnTapEnded();
                 GameOver();
-
                 return;
             }
 
@@ -123,6 +127,8 @@ namespace Code.GamePlay.Scaler
             _infectionRadius = 0f;
 
             _bullet = CreateBullet();
+            _bullet.BulletDestroyed += OnBulletDestroyed;
+
             _bulletTransform = _bullet.transform;
             _bulletTransform.localScale = Vector3.one * _bulletScaleModifier;
         }
@@ -139,13 +145,11 @@ namespace Code.GamePlay.Scaler
 
             _bullet.Initialize(direction, finalInfectionRadius);
             _shotsFired++;
-
-            StartCoroutine(CheckPathAfterShot());
         }
 
-        private IEnumerator CheckPathAfterShot()
+        private void OnBulletDestroyed(Bullet bullet)
         {
-            yield return new WaitForSeconds(CheckDelay);
+            bullet.BulletDestroyed -= OnBulletDestroyed;
 
             if (IsPathBlockedByObstacle())
             {
@@ -155,6 +159,7 @@ namespace Code.GamePlay.Scaler
             else
             {
                 _pathCleared = true;
+
                 _tapInputHandler.TapStarted -= OnTapStarted;
                 _tapInputHandler.TapEnded -= OnTapEnded;
 
