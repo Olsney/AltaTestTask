@@ -190,18 +190,23 @@ namespace Code.GamePlay.Scaler
 
         private bool IsPathBlockedByObstacle()
         {
-            if (_doorTransform == null)
+            if (_roadTransform == null)
                 return true;
 
-            Vector3 start = _playerBall.transform.position;
-            Vector3 target = _levelTargetProvider.Instance != null
-                ? _levelTargetProvider.Instance.transform.position
-                : _doorTransform.position;
+            Vector3 roadPosition = _roadTransform.position;
+            Vector3 roadScale = _roadTransform.localScale;
 
-            float distance = Vector3.Distance(start, target);
-            float radius = distance * 1.5f;
+            // Центр коробки по всей длине дороги
+            Vector3 center = roadPosition + Vector3.up * 1.0f;
 
-            Collider[] colliders = Physics.OverlapSphere(start, radius);
+            // Half-extents по полной длине
+            float halfLength = roadScale.x * 5f; // road by default = 10 units wide in scale (Unity plane)
+            float halfWidth = roadScale.z / 2f;
+            float halfHeight = 1.5f;
+
+            Vector3 halfExtents = new Vector3(halfLength, halfHeight, halfWidth);
+
+            Collider[] colliders = Physics.OverlapBox(center, halfExtents, Quaternion.identity);
 
             foreach (Collider collider in colliders)
             {
@@ -211,6 +216,8 @@ namespace Code.GamePlay.Scaler
 
             return false;
         }
+
+
 
         private void TryFindDoor()
         {
