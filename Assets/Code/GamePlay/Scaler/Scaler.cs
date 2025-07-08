@@ -59,7 +59,16 @@ namespace Code.GamePlay.Scaler
         {
             _tapInputHandler = _tapInputHandlerProvider.GetTapInputHandler();
             _playerBall = _playerBallProvider.GetBall();
+            
+            if(_playerBall == null)
+                throw new NullReferenceException("Player ball is null");
+            
             _ball = _playerBall.GetComponent<Ball>();
+            
+            if(_ball == null)
+                throw new NullReferenceException("ball is null");
+            
+            
             _initialBallScale = _playerBall.transform.localScale;
 
             _pathCleared = false;
