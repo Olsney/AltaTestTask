@@ -14,7 +14,7 @@ namespace Code.GamePlay.Scaler
 {
     public class Scaler : MonoBehaviour
     {
-        private const int MaxShots = 5;
+        private const int MaxShots = 7;
         private const float RadiusToFindDoor = 100f;
 
         [SerializeField] private float _minBallScale = 0.2f;
@@ -181,7 +181,10 @@ namespace Code.GamePlay.Scaler
                 _tapInputHandler.TapEnded -= OnTapEnded;
 
                 if (_ball != null && _levelTargetProvider.Instance != null)
-                    _ball.JumpTo(_levelTargetProvider.Instance.transform.position);
+                {
+                    Vector3 target = _levelTargetProvider.Instance.transform.position;
+                    _ball.JumpTo(target);
+                }
             }
         }
 
