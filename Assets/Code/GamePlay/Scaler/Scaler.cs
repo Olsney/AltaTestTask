@@ -14,7 +14,7 @@ namespace Code.GamePlay.Scaler
 {
     public class Scaler : MonoBehaviour
     {
-        private const int MaxShots = 4;
+        private const int MaxShots = 5;
         private const float RadiusToFindDoor = 100f;
 
         [SerializeField] private float _minBallScale = 0.2f;
@@ -35,7 +35,10 @@ namespace Code.GamePlay.Scaler
         private Transform _doorTransform;
         private Bullet _bullet;
         private Transform _bulletTransform;
+        private Transform _roadTransform;
+
         private Vector3 _initialBallScale;
+        private float _initialRoadWidth;
 
         private bool _isCharging;
         private bool _pathCleared;
@@ -67,10 +70,18 @@ namespace Code.GamePlay.Scaler
                 throw new NullReferenceException("Player ball is null");
 
             _ball = _playerBall.GetComponent<Ball>();
+            
             if (_ball == null)
                 throw new NullReferenceException("Ball component not found");
 
+            _roadTransform = _roadProvider.Instance.transform;
+            
+            if (_roadTransform == null)
+                throw new NullReferenceException("Road transform is null");
+
             _initialBallScale = _playerBall.transform.localScale;
+            _initialRoadWidth = _roadTransform.localScale.z;
+
             _pathCleared = false;
             _bulletAlive = false;
 
@@ -106,6 +117,7 @@ namespace Code.GamePlay.Scaler
                 _playerBall.transform.localScale = newScale;
                 _infectionRadius += delta * _infectionRadiusPerMoment;
 
+                UpdateRoadScale(newScale.x);
                 _isCharging = false;
                 OnTapEnded();
                 GameOver();
@@ -117,6 +129,8 @@ namespace Code.GamePlay.Scaler
 
             if (_bulletTransform != null)
                 _bulletTransform.localScale += new Vector3(delta, delta, delta);
+
+            UpdateRoadScale(newScale.x);
         }
 
         private void OnTapStarted()
@@ -219,6 +233,14 @@ namespace Code.GamePlay.Scaler
 
             GameObject bulletGO = _bulletFactory.CreateBullet(spawnPoint);
             return bulletGO.GetComponent<Bullet>();
+        }
+
+        private void UpdateRoadScale(float currentBallScaleX)
+        {
+            float scaleRatio = currentBallScaleX / _initialBallScale.x;
+            Vector3 newRoadScale = _roadTransform.localScale;
+            newRoadScale.z = _initialRoadWidth * scaleRatio;
+            _roadTransform.localScale = newRoadScale;
         }
 
         private void GameOver()

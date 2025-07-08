@@ -52,10 +52,10 @@ namespace Code.Infrastructure.States
 
         private void InitGameWorld()
         {
+            _gameFactory.CreatePlayerRoad();
             _gameFactory.CreateTapInputHandler();
             _gameFactory.CreateScaler();
             _gameFactory.CreateLevelTarget();
-            _gameFactory.CreatePlayerRoad();
         }
     }
 }
