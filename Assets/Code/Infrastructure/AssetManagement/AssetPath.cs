@@ -5,6 +5,7 @@ namespace Code.Infrastructure.AssetManagement
         public const string PlayerBallPath = "Player/PlayerBall";
         public const string TapInputHandlerPath = "Input/TapInputHandler";
         public const string PlayerBulletPath = "Player/PlayerBullet";
+        public const string ScalerPath = "Scaler/Scaler";
         public const string DoorPath = "Door/DoorsToNextLevel";
         public const string ObstaclesPath = "Obstacles/Obstacle";
     }

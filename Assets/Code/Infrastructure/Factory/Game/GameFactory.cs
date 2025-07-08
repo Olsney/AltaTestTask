@@ -1,5 +1,6 @@
 using Code.GamePlay;
 using Code.Infrastructure.AssetManagement;
+using Code.Services.Inputs;
 using Code.Services.PlayerBallProvider;
 using Code.Services.TapInputHandlerProvider;
 using UnityEngine;
@@ -13,16 +14,19 @@ namespace Code.Infrastructure.Factory
         private readonly IAssetProvider _assets;
         private readonly ITapInputHandlerProvider _tapInputHandlerProvider;
         private readonly IPlayerBallProvider _playerBallProvider;
+        private readonly IInputService _inputService;
 
         public GameFactory(IInstantiator instantiator, 
             IAssetProvider assets,
             ITapInputHandlerProvider tapInputHandlerProvider,
-            IPlayerBallProvider playerBallProvider)
+            IPlayerBallProvider playerBallProvider, 
+            IInputService inputService)
         {
             _instantiator = instantiator;
             _assets = assets;
             _tapInputHandlerProvider = tapInputHandlerProvider;
             _playerBallProvider = playerBallProvider;
+            _inputService = inputService;
         }
         
         public GameObject CreatePlayerBall(Vector3 at)
@@ -41,9 +45,21 @@ namespace Code.Infrastructure.Factory
             GameObject prefab = _assets.Load(AssetPath.TapInputHandlerPath);
 
             GameObject instance = _instantiator.InstantiatePrefab(prefab, Vector3.zero, Quaternion.identity, null);
-            TapInputHandler tapInputHandlerProvider = instance.GetComponent<TapInputHandler>();
+            TapInputHandler tapInputHandler = instance.GetComponent<TapInputHandler>();
             
-            _tapInputHandlerProvider.SetInputHandler(tapInputHandlerProvider);
+            _tapInputHandlerProvider.SetInputHandler(tapInputHandler);
+            
+            return instance;
+        }
+        
+        public GameObject CreateScaler()
+        {
+            GameObject prefab = _assets.Load(AssetPath.ScalerPath);
+
+            GameObject instance = _instantiator.InstantiatePrefab(prefab, Vector3.zero, Quaternion.identity, null);
+            Scaler scaler = instance.GetComponent<Scaler>();
+
+            scaler.Initialize();
             
             return instance;
         }

@@ -17,18 +17,22 @@ namespace Code.GamePlay
         public void Construct(IInputService inputService)
         {
             _inputService = inputService;
+            Debug.Log("Construct in TapInputHandler" + _inputService);
         }
-
+        
         private void Update()
         {
             if (_inputService.IsTapStarted())
             {
+                Debug.Log("TapInputHandler поймал начало нажатия и кинул событие");
                 TapStarted?.Invoke();
                 _isHeld = true;
             }
 
             if (_inputService.IsTapEnded() && _isHeld)
             {
+                Debug.Log("TapInputHandler поймал конец нажатия и кинул событие");
+
                 TapEnded?.Invoke();
                 _isHeld = false;
             }
