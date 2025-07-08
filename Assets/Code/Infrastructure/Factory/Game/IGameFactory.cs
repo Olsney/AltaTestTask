@@ -7,5 +7,6 @@ namespace Code.Infrastructure.Factory
         GameObject CreatePlayerBall();
         GameObject CreateTapInputHandler();
         GameObject CreateScaler();
+        GameObject CreateLevelTarget();
     }
 }

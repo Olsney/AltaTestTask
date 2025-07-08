@@ -1,11 +1,14 @@
 using Code.GamePlay;
 using Code.GamePlay.InputHandler;
 using Code.GamePlay.Scaler;
+using Code.GamePlay.TargetOnLevel;
 using Code.Infrastructure.AssetManagement;
 using Code.Services.Inputs;
 using Code.Services.PlayerBallProvider;
 using Code.Services.TapInputHandlerProvider;
+using Code.Services.TargetPosition;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Zenject;
 
 namespace Code.Infrastructure.Factory
@@ -17,18 +20,21 @@ namespace Code.Infrastructure.Factory
         private readonly ITapInputHandlerProvider _tapInputHandlerProvider;
         private readonly IPlayerBallProvider _playerBallProvider;
         private readonly IInputService _inputService;
+        private readonly ITargetPositionContainerProvider _targetPositionContainerProvider;
 
         public GameFactory(IInstantiator instantiator, 
             IAssetProvider assets,
             ITapInputHandlerProvider tapInputHandlerProvider,
             IPlayerBallProvider playerBallProvider, 
-            IInputService inputService)
+            IInputService inputService,
+            ITargetPositionContainerProvider targetPositionContainerProvider)
         {
             _instantiator = instantiator;
             _assets = assets;
             _tapInputHandlerProvider = tapInputHandlerProvider;
             _playerBallProvider = playerBallProvider;
             _inputService = inputService;
+            _targetPositionContainerProvider = targetPositionContainerProvider;
         }
         
         public GameObject CreatePlayerBall()
@@ -63,6 +69,18 @@ namespace Code.Infrastructure.Factory
 
             scaler.Initialize();
             
+            return instance;
+        }
+        public GameObject CreateLevelTarget()
+        {
+            GameObject prefab = _assets.Load(AssetPath.LevelTargetPath);
+            LevelTargetPositionContainer containerProvider = _targetPositionContainerProvider.GetContainer();
+
+            GameObject instance = _instantiator.InstantiatePrefab(prefab);
+            LevelTarget levelTarget = instance.GetComponent<LevelTarget>();
+
+            levelTarget.Initialize(containerProvider);
+
             return instance;
         }
     }

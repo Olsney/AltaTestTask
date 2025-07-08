@@ -54,6 +54,7 @@ namespace Code.Infrastructure.States
         {
             GameObject tapInputHandler = _gameFactory.CreateTapInputHandler();
             GameObject scaler = _gameFactory.CreateScaler();
+            _gameFactory.CreateLevelTarget();
         }
     }
 }
