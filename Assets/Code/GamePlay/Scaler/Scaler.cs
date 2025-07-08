@@ -1,10 +1,11 @@
+using Code.GamePlay.InputHandler;
 using Code.Infrastructure.Factory.Armament;
 using Code.Services.PlayerBallProvider;
 using Code.Services.TapInputHandlerProvider;
 using UnityEngine;
 using Zenject;
 
-namespace Code.GamePlay
+namespace Code.GamePlay.Scaler
 {
     public class Scaler : MonoBehaviour
     {

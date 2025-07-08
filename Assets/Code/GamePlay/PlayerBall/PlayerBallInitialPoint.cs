@@ -1,9 +1,8 @@
-using System;
 using Code.Services.PlayerBallProvider;
 using UnityEngine;
 using Zenject;
 
-namespace Code.GamePlay
+namespace Code.GamePlay.PlayerBall
 {
     public class PlayerBallInitialPoint : MonoBehaviour
     {

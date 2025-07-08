@@ -1,4 +1,6 @@
 using Code.GamePlay;
+using Code.GamePlay.InputHandler;
+using Code.GamePlay.Scaler;
 using Code.Infrastructure.AssetManagement;
 using Code.Services.Inputs;
 using Code.Services.PlayerBallProvider;

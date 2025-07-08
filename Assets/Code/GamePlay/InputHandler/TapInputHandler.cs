@@ -3,7 +3,7 @@ using Code.Services.Inputs;
 using UnityEngine;
 using Zenject;
 
-namespace Code.GamePlay
+namespace Code.GamePlay.InputHandler
 {
     public class TapInputHandler : MonoBehaviour
     {
