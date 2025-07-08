@@ -4,7 +4,7 @@ namespace Code.GamePlay
 {
     public class Obstacle : MonoBehaviour
     {
-        private const float DelayBeforeDestroy = 1f;
+        private const float DelayBeforeDestroy = 0.5f;
 
         private readonly Color InfectedColor = Color.yellow;
         

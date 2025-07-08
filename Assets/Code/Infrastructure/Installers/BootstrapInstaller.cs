@@ -4,6 +4,7 @@ using Code.Infrastructure.Factory.Armament;
 using Code.Infrastructure.States;
 using Code.Services.Inputs;
 using Code.Services.PlayerBallProvider;
+using Code.Services.Road;
 using Code.Services.StaticData;
 using Code.Services.TapInputHandlerProvider;
 using Code.Services.TargetContainerPosition;
@@ -52,6 +53,7 @@ namespace Code.Infrastructure.Installers
             Container.Bind<IPlayerBallProvider>().To<PlayerBallProvider>().AsSingle();
             Container.Bind<ITargetPositionContainerProvider>().To<TargetPositionContainerProvider>().AsSingle();
             Container.Bind<ILevelTargetProvider>().To<LevelTargetProvider>().AsSingle();
+            Container.Bind<IRoadProvider>().To<RoadProvider>().AsSingle();
         }
         
         private void BindInputService()

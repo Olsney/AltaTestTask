@@ -52,8 +52,9 @@ namespace Code.Infrastructure.States
 
         private void InitGameWorld()
         {
-            GameObject tapInputHandler = _gameFactory.CreateTapInputHandler();
-            GameObject scaler = _gameFactory.CreateScaler();
+            _gameFactory.CreatePlayerRoad();
+            _gameFactory.CreateTapInputHandler();
+            _gameFactory.CreateScaler();
             _gameFactory.CreateLevelTarget();
         }
     }

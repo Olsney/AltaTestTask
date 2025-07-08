@@ -1,16 +1,19 @@
+using System;
 using UnityEngine;
 
 namespace Code.GamePlay
 {
     public class Bullet : MonoBehaviour
     {
-        private const float DelayBeforeDestroy = 1f;
+        private const float DelayBeforeDestroy = 0.5f;
 
         [SerializeField] private float _speed = 10f;
 
         private Vector3 _direction;
         private bool _canMove;
         private float _infectionRadius;
+
+        public event Action<Bullet> BulletDestroyed;
 
         public void Initialize(Vector3 direction, float infectionRadius)
         {
@@ -32,7 +35,7 @@ namespace Code.GamePlay
 
             _canMove = false;
             Explode();
-            Destroy(gameObject, DelayBeforeDestroy);
+            Invoke(nameof(DestroySelf), DelayBeforeDestroy);
         }
 
         private void Explode()
@@ -44,6 +47,12 @@ namespace Code.GamePlay
                 if (collider.TryGetComponent<Obstacle>(out var obstacle)) 
                     obstacle.Infect();
             }
+        }
+
+        private void DestroySelf()
+        {
+            BulletDestroyed?.Invoke(this);
+            Destroy(gameObject);
         }
 
 #if UNITY_EDITOR

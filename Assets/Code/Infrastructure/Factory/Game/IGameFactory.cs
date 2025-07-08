@@ -8,5 +8,6 @@ namespace Code.Infrastructure.Factory
         GameObject CreateTapInputHandler();
         GameObject CreateScaler();
         GameObject CreateLevelTarget();
+        GameObject CreatePlayerRoad();
     }
 }

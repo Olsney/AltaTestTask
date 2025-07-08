@@ -5,6 +5,7 @@ using Code.GamePlay.TargetOnLevel;
 using Code.Infrastructure.AssetManagement;
 using Code.Services.Inputs;
 using Code.Services.PlayerBallProvider;
+using Code.Services.Road;
 using Code.Services.TapInputHandlerProvider;
 using Code.Services.TargetContainerPosition;
 using Code.Services.TargetProvider;
@@ -23,6 +24,7 @@ namespace Code.Infrastructure.Factory
         private readonly IInputService _inputService;
         private readonly ITargetPositionContainerProvider _targetPositionContainerProvider;
         private readonly ILevelTargetProvider _levelTargetProvider;
+        private readonly IRoadProvider _roadProvider;
 
         public GameFactory(IInstantiator instantiator, 
             IAssetProvider assets,
@@ -30,7 +32,8 @@ namespace Code.Infrastructure.Factory
             IPlayerBallProvider playerBallProvider, 
             IInputService inputService,
             ITargetPositionContainerProvider targetPositionContainerProvider,
-            ILevelTargetProvider levelTargetProvider)
+            ILevelTargetProvider levelTargetProvider,
+            IRoadProvider roadProvider)
         {
             _instantiator = instantiator;
             _assets = assets;
@@ -39,6 +42,7 @@ namespace Code.Infrastructure.Factory
             _inputService = inputService;
             _targetPositionContainerProvider = targetPositionContainerProvider;
             _levelTargetProvider = levelTargetProvider;
+            _roadProvider = roadProvider;
         }
         
         public GameObject CreatePlayerBall()
@@ -48,6 +52,17 @@ namespace Code.Infrastructure.Factory
             GameObject instance = _instantiator.InstantiatePrefab(prefab);
             
             _playerBallProvider.SetBall(instance);
+
+            return instance;
+        }
+        
+        public GameObject CreatePlayerRoad()
+        {
+            GameObject prefab = _assets.Load(AssetPath.PlayerRoadPath);
+
+            GameObject instance = _instantiator.InstantiatePrefab(prefab, new Vector3(0, 0.01f, 0), Quaternion.identity, null);
+            
+            _roadProvider.Instance = instance;
 
             return instance;
         }
