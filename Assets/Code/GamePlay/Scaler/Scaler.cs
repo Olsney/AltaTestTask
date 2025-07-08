@@ -1,7 +1,6 @@
 using System;
 using Code.GamePlay.InputHandler;
 using Code.GamePlay.PlayerBall;
-using Code.GamePlay.TargetOnLevel;
 using Code.Infrastructure.Factory.Armament;
 using Code.Services.PlayerBallProvider;
 using Code.Services.Road;
@@ -15,7 +14,6 @@ namespace Code.GamePlay.Scaler
     public class Scaler : MonoBehaviour
     {
         private const int MaxShots = 5;
-        private const float RadiusToFindDoor = 100f;
         private const float MinPercentOfRestScale = 0.2f;
 
         [SerializeField] private float _scaleDecreaseSpeed = 0.25f;
@@ -35,7 +33,6 @@ namespace Code.GamePlay.Scaler
         private Bullet _bullet;
         private Transform _bulletTransform;
         private Transform _roadTransform;
-        private Transform _doorTransform;
 
         private Vector3 _initialBallScale;
         private float _initialRoadWidth;
@@ -66,18 +63,9 @@ namespace Code.GamePlay.Scaler
             _tapInputHandler = _tapInputHandlerProvider.GetTapInputHandler();
             _playerBall = _playerBallProvider.GetBall();
 
-            if (_playerBall == null)
-                throw new NullReferenceException("Player ball is null");
-
             _ball = _playerBall.GetComponent<Ball>();
-            
-            if (_ball == null)
-                throw new NullReferenceException("Ball component not found");
 
             _roadTransform = _roadProvider.Instance.transform;
-            
-            if (_roadTransform == null)
-                throw new NullReferenceException("Road transform is null");
 
             _initialBallScale = _playerBall.transform.localScale;
             _initialRoadWidth = _roadTransform.localScale.z;
@@ -87,8 +75,6 @@ namespace Code.GamePlay.Scaler
 
             _tapInputHandler.TapStarted += OnTapStarted;
             _tapInputHandler.TapEnded += OnTapEnded;
-
-            TryFindDoor();
         }
 
         private void OnDestroy()
@@ -121,6 +107,7 @@ namespace Code.GamePlay.Scaler
                 _isCharging = false;
                 OnTapEnded();
                 GameOver();
+                
                 return;
             }
 
@@ -215,33 +202,14 @@ namespace Code.GamePlay.Scaler
             return false;
         }
 
-
-
-        private void TryFindDoor()
-        {
-            Collider[] colliders = Physics.OverlapSphere(_playerBall.transform.position, RadiusToFindDoor);
-
-            foreach (Collider collider in colliders)
-            {
-                if (collider.TryGetComponent(out Door door))
-                {
-                    _doorTransform = door.transform;
-                    
-                    return;
-                }
-            }
-
-            throw new Exception("Door not found in radius");
-        }
-
         private Bullet CreateBullet()
         {
             Vector3 spawnPoint = _playerBall.transform.position
                                  + _playerBall.transform.right * -1.8f
                                  + Vector3.up * 0.1f;
 
-            GameObject bulletGO = _bulletFactory.CreateBullet(spawnPoint);
-            return bulletGO.GetComponent<Bullet>();
+            GameObject bullet = _bulletFactory.CreateBullet(spawnPoint);
+            return bullet.GetComponent<Bullet>();
         }
 
         private void UpdateRoadScale(float currentBallScaleX)
@@ -252,10 +220,7 @@ namespace Code.GamePlay.Scaler
             _roadTransform.localScale = newRoadScale;
         }
 
-        private void GameOver()
-        {
+        private void GameOver() => 
             Debug.Log("Game Over");
-            // TODO: UI
-        }
     }
 }

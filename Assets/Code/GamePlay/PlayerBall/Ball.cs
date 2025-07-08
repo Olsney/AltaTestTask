@@ -8,7 +8,7 @@ namespace Code.GamePlay.PlayerBall
         [SerializeField] private float _jumpHeight = 0.5f;
         [SerializeField] private float _jumpDuration = 0.015f;
         [SerializeField] private float _stepDistance = 3.5f;
-        [SerializeField] private float _minDistanceToTarget = 0.2f; // немного больше
+        [SerializeField] private float _minDistanceToTarget = 0.2f;
         [SerializeField] private float _groundOffset = 0.05f;
 
         private Coroutine _jumpCoroutine;
@@ -43,7 +43,6 @@ namespace Code.GamePlay.PlayerBall
                 yield return StartCoroutine(SingleJumpRoutine(current, nextTarget));
             }
 
-            // Гарантированно ставим точно на дверь
             Vector3 finalLanding = finalTarget;
             finalLanding.y = _groundOffset;
             transform.position = finalLanding;
