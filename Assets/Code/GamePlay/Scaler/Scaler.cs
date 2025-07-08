@@ -14,7 +14,7 @@ namespace Code.GamePlay.Scaler
 {
     public class Scaler : MonoBehaviour
     {
-        private const int MaxShots = 7;
+        private const int MaxShots = 4;
         private const float RadiusToFindDoor = 100f;
 
         [SerializeField] private float _minBallScale = 0.2f;
@@ -31,7 +31,6 @@ namespace Code.GamePlay.Scaler
 
         private TapInputHandler _tapInputHandler;
         private GameObject _playerBall;
-        private GameObject _road;
         private Ball _ball;
         private Transform _doorTransform;
         private Bullet _bullet;
@@ -40,6 +39,7 @@ namespace Code.GamePlay.Scaler
 
         private bool _isCharging;
         private bool _pathCleared;
+        private bool _bulletAlive;
         private float _infectionRadius;
         private int _shotsFired;
 
@@ -62,18 +62,17 @@ namespace Code.GamePlay.Scaler
         {
             _tapInputHandler = _tapInputHandlerProvider.GetTapInputHandler();
             _playerBall = _playerBallProvider.GetBall();
-            _road = _roadProvider.Instance;
 
             if (_playerBall == null)
                 throw new NullReferenceException("Player ball is null");
 
             _ball = _playerBall.GetComponent<Ball>();
-
             if (_ball == null)
-                throw new NullReferenceException("ball is null");
+                throw new NullReferenceException("Ball component not found");
 
             _initialBallScale = _playerBall.transform.localScale;
             _pathCleared = false;
+            _bulletAlive = false;
 
             _tapInputHandler.TapStarted += OnTapStarted;
             _tapInputHandler.TapEnded += OnTapEnded;
@@ -115,27 +114,30 @@ namespace Code.GamePlay.Scaler
 
             _playerBall.transform.localScale = newScale;
             _infectionRadius += delta * _infectionRadiusPerMoment;
-            _bulletTransform.localScale += new Vector3(delta, delta, delta);
+
+            if (_bulletTransform != null)
+                _bulletTransform.localScale += new Vector3(delta, delta, delta);
         }
 
         private void OnTapStarted()
         {
-            if (_pathCleared || _shotsFired >= MaxShots)
+            if (_pathCleared || _shotsFired >= MaxShots || _bulletAlive)
                 return;
 
             _isCharging = true;
             _infectionRadius = 0f;
 
             _bullet = CreateBullet();
-            _bullet.BulletDestroyed += OnBulletDestroyed;
-
             _bulletTransform = _bullet.transform;
             _bulletTransform.localScale = Vector3.one * _bulletScaleModifier;
+
+            _bullet.BulletDestroyed += OnBulletDestroyed;
+            _bulletAlive = true;
         }
 
         private void OnTapEnded()
         {
-            if (!_isCharging || _pathCleared)
+            if (!_isCharging || _pathCleared || _bullet == null)
                 return;
 
             _isCharging = false;
@@ -149,6 +151,7 @@ namespace Code.GamePlay.Scaler
 
         private void OnBulletDestroyed(Bullet bullet)
         {
+            _bulletAlive = false;
             bullet.BulletDestroyed -= OnBulletDestroyed;
 
             if (IsPathBlockedByObstacle())
@@ -205,7 +208,7 @@ namespace Code.GamePlay.Scaler
                 }
             }
 
-            throw new Exception("Door is not found");
+            throw new Exception("Door not found in radius");
         }
 
         private Bullet CreateBullet()
@@ -214,13 +217,14 @@ namespace Code.GamePlay.Scaler
                                  + _playerBall.transform.right * -1.8f
                                  + Vector3.up * 0.1f;
 
-            GameObject bullet = _bulletFactory.CreateBullet(spawnPoint);
-            return bullet.GetComponent<Bullet>();
+            GameObject bulletGO = _bulletFactory.CreateBullet(spawnPoint);
+            return bulletGO.GetComponent<Bullet>();
         }
 
         private void GameOver()
         {
             Debug.LogError("Game Over");
+            // TODO: Notify game manager / UI
         }
     }
 }
