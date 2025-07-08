@@ -31,11 +31,11 @@ namespace Code.Infrastructure.Factory
             _inputService = inputService;
         }
         
-        public GameObject CreatePlayerBall(Vector3 at)
+        public GameObject CreatePlayerBall()
         {
             GameObject prefab = _assets.Load(AssetPath.PlayerBallPath);
 
-            GameObject instance = _instantiator.InstantiatePrefab(prefab, at, Quaternion.identity, null);
+            GameObject instance = _instantiator.InstantiatePrefab(prefab);
             
             _playerBallProvider.SetBall(instance);
 

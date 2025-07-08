@@ -29,7 +29,7 @@ namespace Code.Infrastructure.States
 
         public void Enter(string sceneName)
         {
-            GameObject playerBall = _gameFactory.CreatePlayerBall(at: new Vector3(0, 0, 0));
+            _gameFactory.CreatePlayerBall();
             
             _sceneLoader.Load(EmptySceneName, () =>  _sceneLoader.Load(sceneName, OnLoaded));
         }
