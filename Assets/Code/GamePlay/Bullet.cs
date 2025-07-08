@@ -45,5 +45,13 @@ namespace Code.GamePlay
                     obstacle.Infect();
             }
         }
+
+#if UNITY_EDITOR
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, _infectionRadius);
+        }
+#endif
     }
 }

@@ -12,6 +12,7 @@ namespace Code.GamePlay
         [SerializeField] private float _scaleDecreaseSpeed = 0.25f;
         [SerializeField] private float _infectionRadiusPerMoment = 2.0f;
         [SerializeField] private float _bulletScaleModifier = 0.5f;
+        [SerializeField] private float _minInfectionRadius = 1.0f;
 
         private ITapInputHandlerProvider _tapInputHandlerProvider;
         private IBulletFactory _bulletFactory;
@@ -69,10 +70,8 @@ namespace Code.GamePlay
                 _playerBall.transform.localScale = newScale;
 
                 _infectionRadius += delta * _infectionRadiusPerMoment;
-
                 OnTapEnded();
                 GameOver();
-                
                 return;
             }
 
@@ -87,7 +86,6 @@ namespace Code.GamePlay
             _infectionRadius = 0f;
 
             _bullet = CreateBullet();
-            Debug.Log("Создали пулю!");
             _bulletTransform = _bullet.transform;
 
             _bulletTransform.localScale = Vector3.one * _bulletScaleModifier;
@@ -100,17 +98,16 @@ namespace Code.GamePlay
 
             _isCharging = false;
 
+            float finalInfectionRadius = Mathf.Max(_infectionRadius, _minInfectionRadius);
             Vector3 direction = Vector3.left;
-            Debug.DrawRay(_playerBall.transform.position, direction * 5f, Color.red, 2f); // 👈 добавь это
 
-            _bullet.Initialize(direction, _infectionRadius);
-            Debug.Log("Запустили пулю!");
+            _bullet.Initialize(direction, finalInfectionRadius);
         }
 
         private Bullet CreateBullet()
         {
             Vector3 spawnPoint = _playerBall.transform.position 
-                                 + _playerBall.transform.right * -1.8f 
+                                 + _playerBall.transform.right * - 1.8f 
                                  + Vector3.up * 0.1f;
 
             GameObject bullet = _bulletFactory.CreateBullet(spawnPoint);
