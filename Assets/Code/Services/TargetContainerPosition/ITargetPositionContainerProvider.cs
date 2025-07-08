@@ -1,6 +1,6 @@
 using Code.GamePlay.TargetOnLevel;
 
-namespace Code.Services.TargetPosition
+namespace Code.Services.TargetContainerPosition
 {
     public interface ITargetPositionContainerProvider
     {

@@ -6,7 +6,8 @@ using Code.Infrastructure.AssetManagement;
 using Code.Services.Inputs;
 using Code.Services.PlayerBallProvider;
 using Code.Services.TapInputHandlerProvider;
-using Code.Services.TargetPosition;
+using Code.Services.TargetContainerPosition;
+using Code.Services.TargetProvider;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Zenject;
@@ -21,13 +22,15 @@ namespace Code.Infrastructure.Factory
         private readonly IPlayerBallProvider _playerBallProvider;
         private readonly IInputService _inputService;
         private readonly ITargetPositionContainerProvider _targetPositionContainerProvider;
+        private readonly ILevelTargetProvider _levelTargetProvider;
 
         public GameFactory(IInstantiator instantiator, 
             IAssetProvider assets,
             ITapInputHandlerProvider tapInputHandlerProvider,
             IPlayerBallProvider playerBallProvider, 
             IInputService inputService,
-            ITargetPositionContainerProvider targetPositionContainerProvider)
+            ITargetPositionContainerProvider targetPositionContainerProvider,
+            ILevelTargetProvider levelTargetProvider)
         {
             _instantiator = instantiator;
             _assets = assets;
@@ -35,6 +38,7 @@ namespace Code.Infrastructure.Factory
             _playerBallProvider = playerBallProvider;
             _inputService = inputService;
             _targetPositionContainerProvider = targetPositionContainerProvider;
+            _levelTargetProvider = levelTargetProvider;
         }
         
         public GameObject CreatePlayerBall()
@@ -80,6 +84,7 @@ namespace Code.Infrastructure.Factory
             LevelTarget levelTarget = instance.GetComponent<LevelTarget>();
 
             levelTarget.Initialize(containerProvider);
+            _levelTargetProvider.Instance = levelTarget;
 
             return instance;
         }

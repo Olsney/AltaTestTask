@@ -1,8 +1,10 @@
 using System;
 using Code.GamePlay.InputHandler;
+using Code.GamePlay.TargetOnLevel;
 using Code.Infrastructure.Factory.Armament;
 using Code.Services.PlayerBallProvider;
 using Code.Services.TapInputHandlerProvider;
+using Code.Services.TargetProvider;
 using UnityEngine;
 using Zenject;
 
@@ -35,15 +37,18 @@ namespace Code.GamePlay.Scaler
         
         private int _shotsFired;
         private Transform _doorTransform;
+        private ILevelTargetProvider _levelTargetProvider;
 
         [Inject]
         public void Construct(ITapInputHandlerProvider tapInputHandlerProvider,
             IPlayerBallProvider playerBallProvider,
-            IBulletFactory bulletFactory)
+            IBulletFactory bulletFactory,
+            ILevelTargetProvider levelTargetProvider)
         {
             _tapInputHandlerProvider = tapInputHandlerProvider;
             _playerBallProvider = playerBallProvider;
             _bulletFactory = bulletFactory;
+            _levelTargetProvider = levelTargetProvider;
         }
 
         public void Initialize()
@@ -51,6 +56,7 @@ namespace Code.GamePlay.Scaler
             _tapInputHandler = _tapInputHandlerProvider.GetTapInputHandler();
             _playerBall = _playerBallProvider.GetBall();
             _initialBallScale = _playerBall.transform.localScale;
+            LevelTarget levelTarget = _levelTargetProvider.Instance;
 
             _tapInputHandler.TapStarted += OnTapStarted;
             _tapInputHandler.TapEnded += OnTapEnded;
