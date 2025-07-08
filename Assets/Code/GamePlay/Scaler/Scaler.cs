@@ -27,24 +27,27 @@ namespace Code.GamePlay.Scaler
         private ITapInputHandlerProvider _tapInputHandlerProvider;
         private IBulletFactory _bulletFactory;
         private IPlayerBallProvider _playerBallProvider;
+        private ILevelTargetProvider _levelTargetProvider;
 
         private TapInputHandler _tapInputHandler;
         private GameObject _playerBall;
+        private Ball _ball;
+        private Transform _doorTransform;
+
         private Bullet _bullet;
         private Transform _bulletTransform;
         private Vector3 _initialBallScale;
 
         private bool _isCharging;
-        private float _infectionRadius;
-        
-        private int _shotsFired;
-        private Transform _doorTransform;
-        private ILevelTargetProvider _levelTargetProvider;
-        private Ball _ball;
         private bool _pathCleared;
+        private bool _canShoot;
+
+        private float _infectionRadius;
+        private int _shotsFired;
 
         [Inject]
-        public void Construct(ITapInputHandlerProvider tapInputHandlerProvider,
+        public void Construct(
+            ITapInputHandlerProvider tapInputHandlerProvider,
             IPlayerBallProvider playerBallProvider,
             IBulletFactory bulletFactory,
             ILevelTargetProvider levelTargetProvider)
@@ -59,9 +62,10 @@ namespace Code.GamePlay.Scaler
         {
             _tapInputHandler = _tapInputHandlerProvider.GetTapInputHandler();
             _playerBall = _playerBallProvider.GetBall();
-            _initialBallScale = _playerBall.transform.localScale;
-            LevelTarget levelTarget = _levelTargetProvider.Instance;
             _ball = _playerBall.GetComponent<Ball>();
+            _initialBallScale = _playerBall.transform.localScale;
+
+            _canShoot = true;
             _pathCleared = false;
 
             _tapInputHandler.TapStarted += OnTapStarted;
@@ -81,7 +85,7 @@ namespace Code.GamePlay.Scaler
 
         private void Update()
         {
-            if (!_isCharging)
+            if (!_isCharging || !_canShoot || _bulletTransform == null)
                 return;
 
             float delta = _scaleDecreaseSpeed * Time.deltaTime;
@@ -89,13 +93,18 @@ namespace Code.GamePlay.Scaler
 
             if (newScale.x <= _initialBallScale.x * _minBallScale)
             {
-                newScale = _initialBallScale * _minBallScale;
-                _playerBall.transform.localScale = newScale;
-
+                _playerBall.transform.localScale = _initialBallScale * _minBallScale;
                 _infectionRadius += delta * _infectionRadiusPerMoment;
-                OnTapEnded();
+
+                _isCharging = false;
+                _canShoot = false;
+
+                Destroy(_bullet?.gameObject);
+                _bullet = null;
+                _bulletTransform = null;
+
                 GameOver();
-                
+                Debug.LogError("Ball shrunk too much — Game Over");
                 return;
             }
 
@@ -106,87 +115,77 @@ namespace Code.GamePlay.Scaler
 
         private void OnTapStarted()
         {
-            if (_pathCleared)
+            if (!_canShoot || _isCharging)
                 return;
-            
+
             if (_shotsFired >= MaxShots)
             {
                 Debug.Log("No shots remaining");
                 return;
             }
 
-            
             _isCharging = true;
             _infectionRadius = 0f;
 
             _bullet = CreateBullet();
             _bulletTransform = _bullet.transform;
-
             _bulletTransform.localScale = Vector3.one * _bulletScaleModifier;
         }
 
         private void OnTapEnded()
         {
-            if (!_isCharging || _pathCleared)
+            if (!_isCharging || !_canShoot)
                 return;
 
+            FireBullet();
+        }
+
+        private void FireBullet()
+        {
             _isCharging = false;
 
             float finalInfectionRadius = Mathf.Max(_infectionRadius, _minInfectionRadius);
             Vector3 direction = Vector3.left;
 
             _bullet.Initialize(direction, finalInfectionRadius);
-            
+            _bullet = null;
+            _bulletTransform = null;
+
             _shotsFired++;
-            
+            Debug.Log($"Shot fired: {_shotsFired}");
+
+            if (_shotsFired >= MaxShots)
+                _canShoot = false;
+
             StartCoroutine(CheckPathAfterShot());
         }
 
-        private void TryFindDoor()
-        {
-            Collider[] colliders = Physics.OverlapSphere(_playerBall.transform.position, RadiusToFindDoor);
-
-            foreach (Collider collider in colliders)
-            {
-                if (collider.TryGetComponent(out Door door) == false)
-                    continue;
-                
-                _doorTransform = door.transform;
-            }
-            
-            if(_doorTransform == null)
-                throw new Exception("Door is not found");
-        }
-
-        private Bullet CreateBullet()
-        {
-            Vector3 spawnPoint = _playerBall.transform.position 
-                                 + _playerBall.transform.right * - 1.8f 
-                                 + Vector3.up * 0.1f;
-
-            GameObject bullet = _bulletFactory.CreateBullet(spawnPoint);
-            return bullet.GetComponent<Bullet>();
-        }
-        
         private IEnumerator CheckPathAfterShot()
         {
             yield return new WaitForSeconds(CheckDelay);
 
             if (IsPathBlocked())
             {
+                Debug.Log("Path is blocked");
+
                 if (_shotsFired >= MaxShots)
+                {
+                    _canShoot = false;
                     GameOver();
+                }
             }
             else
             {
+                Debug.Log("Path cleared!");
                 _pathCleared = true;
+                _canShoot = false;
+
                 _tapInputHandler.TapStarted -= OnTapStarted;
                 _tapInputHandler.TapEnded -= OnTapEnded;
-                
+
                 if (_ball != null && _levelTargetProvider.Instance != null)
                     _ball.JumpTo(_levelTargetProvider.Instance.transform.position);
             }
-
         }
 
         private bool IsPathBlocked()
@@ -196,20 +195,44 @@ namespace Code.GamePlay.Scaler
 
             Vector3 start = _playerBall.transform.position;
             Vector3 direction = _doorTransform.position - start;
-            
             float distance = direction.magnitude;
 
-            RaycastHit[] hits = Physics.RaycastAll(start, direction.normalized, distance);
-            
-            foreach (RaycastHit hit in hits)
+            Collider[] hits = Physics.OverlapSphere(start, distance * 100f);
+
+            foreach (Collider hit in hits)
             {
-                if (hit.collider.GetComponent<Obstacle>() != null)
+                if (hit.TryGetComponent<Obstacle>(out var obstacle) && !obstacle.IsInfected)
                     return true;
             }
 
             return false;
         }
 
+        private void TryFindDoor()
+        {
+            Collider[] colliders = Physics.OverlapSphere(_playerBall.transform.position, RadiusToFindDoor);
+            foreach (Collider collider in colliders)
+            {
+                if (collider.TryGetComponent(out Door door))
+                {
+                    _doorTransform = door.transform;
+                    break;
+                }
+            }
+
+            if (_doorTransform == null)
+                throw new Exception("Door is not found");
+        }
+
+        private Bullet CreateBullet()
+        {
+            Vector3 spawnPoint = _playerBall.transform.position
+                                 + _playerBall.transform.right * -1.8f
+                                 + Vector3.up * 0.1f;
+
+            GameObject bullet = _bulletFactory.CreateBullet(spawnPoint);
+            return bullet.GetComponent<Bullet>();
+        }
 
         private void GameOver()
         {

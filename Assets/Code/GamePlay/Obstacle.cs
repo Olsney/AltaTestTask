@@ -7,9 +7,16 @@ namespace Code.GamePlay
         private const float DelayBeforeDestroy = 1f;
 
         private readonly Color InfectedColor = Color.yellow;
+        
+        public bool IsInfected { get; private set; }
 
         public void Infect()
         {
+            if (IsInfected)
+                return;
+
+            IsInfected = true;
+            
             Renderer renderer = GetComponent<Renderer>();
 
             if (renderer == null)
