@@ -29,6 +29,8 @@ namespace Code.Infrastructure.States
 
         public void Enter(string sceneName)
         {
+            GameObject playerBall = _gameFactory.CreatePlayerBall(at: new Vector3(0, 0, 0));
+            
             _sceneLoader.Load(EmptySceneName, () =>  _sceneLoader.Load(sceneName, OnLoaded));
         }
 
@@ -50,12 +52,8 @@ namespace Code.Infrastructure.States
 
         private void InitGameWorld()
         {
-            GameObject playerBall = _gameFactory.CreatePlayerBall(at: GetHeroSpawnPosition());
             GameObject tapInputHandler = _gameFactory.CreateTapInputHandler();
             GameObject scaler = _gameFactory.CreateScaler();
         }
-
-        private Vector3 GetHeroSpawnPosition() => 
-            GameObject.FindWithTag(InitialPointTag).transform.position;
     }
 }
