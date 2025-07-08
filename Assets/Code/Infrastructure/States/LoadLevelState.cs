@@ -52,6 +52,7 @@ namespace Code.Infrastructure.States
         {
             GameObject playerBall = _gameFactory.CreatePlayerBall(at: GetHeroSpawnPosition());
             GameObject tapInputHandler = _gameFactory.CreateTapInputHandler();
+            GameObject scaler = _gameFactory.CreateScaler();
         }
 
         private Vector3 GetHeroSpawnPosition() => 

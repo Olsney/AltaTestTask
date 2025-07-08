@@ -35,7 +35,7 @@ namespace Code.GamePlay
             _bulletFactory = bulletFactory;
         }
 
-        private void Awake()
+        public void Initialize()
         {
             _tapInputHandler = _tapInputHandlerProvider.GetTapInputHandler();
             _playerBall = _playerBallProvider.GetBall();
@@ -84,6 +84,7 @@ namespace Code.GamePlay
             _infectionRadius = 0f;
 
             _bullet = CreateBullet();
+            Debug.Log("Создали пулю!");
             _bulletTransform = _bullet.transform;
 
             _bulletTransform.localScale = Vector3.one * 0.2f;
@@ -99,6 +100,7 @@ namespace Code.GamePlay
             Vector3 direction = Vector3.forward;
             
             _bullet.Initialize(direction, _infectionRadius);
+            Debug.Log("Запустили пулю!");
         }
 
         private Bullet CreateBullet()
@@ -107,7 +109,7 @@ namespace Code.GamePlay
             GameObject bullet = _bulletFactory.CreateBullet(spawnPoint);
 
             return bullet.GetComponent<Bullet>();
-        }
+        }   
 
         private void GameOver()
         {
