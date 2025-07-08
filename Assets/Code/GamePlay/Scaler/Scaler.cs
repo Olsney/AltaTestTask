@@ -14,10 +14,10 @@ namespace Code.GamePlay.Scaler
 {
     public class Scaler : MonoBehaviour
     {
-        private const int MaxShots = 7;
+        private const int MaxShots = 5;
         private const float RadiusToFindDoor = 100f;
+        private const float MinPercentOfRestScale = 0.2f;
 
-        [SerializeField] private float _minBallScale = 0.2f;
         [SerializeField] private float _scaleDecreaseSpeed = 0.25f;
         [SerializeField] private float _infectionRadiusPerMoment = 2.0f;
         [SerializeField] private float _bulletScaleModifier = 0.5f;
@@ -32,10 +32,10 @@ namespace Code.GamePlay.Scaler
         private TapInputHandler _tapInputHandler;
         private GameObject _playerBall;
         private Ball _ball;
-        private Transform _doorTransform;
         private Bullet _bullet;
         private Transform _bulletTransform;
         private Transform _roadTransform;
+        private Transform _doorTransform;
 
         private Vector3 _initialBallScale;
         private float _initialRoadWidth;
@@ -111,9 +111,9 @@ namespace Code.GamePlay.Scaler
             float delta = _scaleDecreaseSpeed * Time.deltaTime;
             Vector3 newScale = _playerBall.transform.localScale - new Vector3(delta, delta, delta);
 
-            if (newScale.x <= _initialBallScale.x * _minBallScale)
+            if (newScale.x <= _initialBallScale.x * MinPercentOfRestScale)
             {
-                newScale = _initialBallScale * _minBallScale;
+                newScale = _initialBallScale * MinPercentOfRestScale;
                 _playerBall.transform.localScale = newScale;
                 _infectionRadius += delta * _infectionRadiusPerMoment;
 
@@ -196,11 +196,9 @@ namespace Code.GamePlay.Scaler
             Vector3 roadPosition = _roadTransform.position;
             Vector3 roadScale = _roadTransform.localScale;
 
-            // Центр коробки по всей длине дороги
             Vector3 center = roadPosition + Vector3.up * 1.0f;
 
-            // Half-extents по полной длине
-            float halfLength = roadScale.x * 5f; // road by default = 10 units wide in scale (Unity plane)
+            float halfLength = roadScale.x * 5f;
             float halfWidth = roadScale.z / 2f;
             float halfHeight = 1.5f;
 
@@ -228,6 +226,7 @@ namespace Code.GamePlay.Scaler
                 if (collider.TryGetComponent(out Door door))
                 {
                     _doorTransform = door.transform;
+                    
                     return;
                 }
             }
@@ -255,8 +254,8 @@ namespace Code.GamePlay.Scaler
 
         private void GameOver()
         {
-            Debug.LogError("Game Over");
-            // TODO: Notify game manager / UI
+            Debug.Log("Game Over");
+            // TODO: UI
         }
     }
 }
