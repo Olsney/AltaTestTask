@@ -45,5 +45,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _minBallScale: 0.2
-  _scaleDecreaseSpeed: 0.25
-  _infectionRadiusPerMoment: 2
+  _scaleDecreaseSpeed: 0.4
+  _infectionRadiusPerMoment: 3

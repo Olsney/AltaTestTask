@@ -6,6 +6,8 @@ using Code.Services.Inputs;
 using Code.Services.PlayerBallProvider;
 using Code.Services.StaticData;
 using Code.Services.TapInputHandlerProvider;
+using Code.Services.TargetContainerPosition;
+using Code.Services.TargetProvider;
 using UnityEngine;
 using Zenject;
 
@@ -48,6 +50,8 @@ namespace Code.Infrastructure.Installers
             Container.Bind<IAssetProvider>().To<AssetProvider>().AsSingle();
             Container.Bind<ITapInputHandlerProvider>().To<TapInputHandlerProvider>().AsSingle();
             Container.Bind<IPlayerBallProvider>().To<PlayerBallProvider>().AsSingle();
+            Container.Bind<ITargetPositionContainerProvider>().To<TargetPositionContainerProvider>().AsSingle();
+            Container.Bind<ILevelTargetProvider>().To<LevelTargetProvider>().AsSingle();
         }
         
         private void BindInputService()

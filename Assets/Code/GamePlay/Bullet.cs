@@ -1,14 +1,11 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Code.GamePlay
 {
-    using UnityEngine;
-
     public class Bullet : MonoBehaviour
     {
-        private const float DelayBeforeDestroy = 2f;
-        
+        private const float DelayBeforeDestroy = 1f;
+
         [SerializeField] private float _speed = 10f;
 
         private Vector3 _direction;
@@ -30,7 +27,7 @@ namespace Code.GamePlay
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.TryGetComponent<Obstacle>(out var obstacle) == false)
+            if (!other.TryGetComponent<Obstacle>(out var obstacle))
                 return;
 
             _canMove = false;
@@ -48,5 +45,13 @@ namespace Code.GamePlay
                     obstacle.Infect();
             }
         }
+
+#if UNITY_EDITOR
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, _infectionRadius);
+        }
+#endif
     }
 }
